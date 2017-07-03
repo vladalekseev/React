@@ -1,84 +1,133 @@
-import React from "react";
-import ReactDOM from "react-dom";
-
-var arr = [
-    {
-        name: 'Vlad',
-        lastname: 'Alesekeev',
-        age: 21,
-        id: 1
-    },
-    {
-        name: 'Bodya',
-        lastname: 'Golubov',
-        age: 21,
-        id: 2
-    },
-    {
-        name: "Valera",
-        lastname: 'Luk',
-        age: 21,
-        id: 3
-    }
-];
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {arr} from '../data.js';
 
 
-var Contact = React.createClass({
+
+function Note(props) {
+    return(
+        <div>
+            <h2 onClick={props.onDelete}>{props.children}</h2>
+        </div>
+    )
+}
+
+
+var NotesGrid = React.createClass({
+
+
 
     render() {
-        return (
+
+        var deleteNote = this.props.deleteNote;
+        return(
             <div>
-                <h1>{this.props.name}</h1>
-                <h2>{this.props.lastname}</h2>
-                <h3>{this.props.age}</h3>
+                {
+                    this.props.notes.map((el)=> {
+                        return <Note key={el.id} onDelete={deleteNote.bind(null, el)} >{el.text}</Note>
+                    })
+                }
             </div>
         )
     }
-
 });
+
+
+var NoteEditor = React.createClass({
+
+    getInitialState() {
+      return {
+          val: ""
+      }
+    },
+
+    handleChange(e) {
+        this.setState({
+           val: e.target.value
+        });
+    },
+
+    handleClick() {
+      var newNote = {
+          text: this.state.val,
+          id: Date.now()
+      };
+      this.props.onAddNote(newNote);
+
+      this.setState({
+          val: ""
+      });
+    },
+
+    render() {
+        return(
+            <div>
+                <textarea cols="30" rows="10" value={this.state.val} onChange={this.handleChange}/>
+                <button onClick={this.handleClick}>Add</button>
+            </div>
+        )
+    }
+});
+
 
 
 var App = React.createClass({
 
     getInitialState() {
-        return {
-            persons: arr
+      return {
+          notes: arr
+      }
+    },
+
+
+    componentDidMount() {
+      var localNotes = JSON.parse(localStorage.getItem('notes'));
+        if(localNotes) {
+            this.setState({
+                notes: localNotes
+            })
         }
     },
 
-    handler(e) {
-        var query = e.target.value.toLowerCase();
-
-        var filtredArr = arr.filter((el) => {
-           if(el.name.toLowerCase().indexOf(query) != -1) {
-               return el.name;
-           }
+    onDeleteNote(note) {
+        var newArr = this.state.notes.filter((el)=> {
+          return el.id != note.id;
         });
 
         this.setState({
-            persons: filtredArr
+            notes: newArr
         });
     },
 
+    addNote(newNote) {
+        var newArr = this.state.notes.slice();
+        newArr.unshift(newNote);
 
+        this.setState({
+            notes: newArr
+        });
+    },
+
+    componentDidUpdate() {
+        this.updateLocalStorage();
+    },
+
+
+    updateLocalStorage() {
+      var notes = JSON.stringify(this.state.notes);
+      localStorage.setItem('notes', notes);
+    },
 
     render() {
-        return (
+        return(
             <div>
-                <input type="text" onChange={this.handler}/>
-                {
-                    this.state.persons.map(function(el) {
-                        return <Contact key={el.id} name={el.name} lastname={el.lastname} age={el.age}/>
-                    })
-                }
-
+                <NoteEditor onAddNote={this.addNote} />
+                <NotesGrid notes={this.state.notes} deleteNote={this.onDeleteNote}/>
             </div>
         )
     }
-
-
 });
 
 
 
-ReactDOM.render(<App />, document.getElementById("content"));
+ReactDOM.render(<App />, document.getElementById('content'));

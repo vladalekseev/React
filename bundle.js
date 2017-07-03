@@ -9757,83 +9757,128 @@ var _reactDom = __webpack_require__(98);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
+var _data = __webpack_require__(184);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var arr = [{
-    name: 'Vlad',
-    lastname: 'Alesekeev',
-    age: 21,
-    id: 1
-}, {
-    name: 'Bodya',
-    lastname: 'Golubov',
-    age: 21,
-    id: 2
-}, {
-    name: "Valera",
-    lastname: 'Luk',
-    age: 21,
-    id: 3
-}];
+function Note(props) {
+    return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+            'h2',
+            { onClick: props.onDelete },
+            props.children
+        )
+    );
+}
 
-var Contact = _react2.default.createClass({
-    displayName: "Contact",
+var NotesGrid = _react2.default.createClass({
+    displayName: 'NotesGrid',
+    render: function render() {
+
+        var deleteNote = this.props.deleteNote;
+        return _react2.default.createElement(
+            'div',
+            null,
+            this.props.notes.map(function (el) {
+                return _react2.default.createElement(
+                    Note,
+                    { key: el.id, onDelete: deleteNote.bind(null, el) },
+                    el.text
+                );
+            })
+        );
+    }
+});
+
+var NoteEditor = _react2.default.createClass({
+    displayName: 'NoteEditor',
+    getInitialState: function getInitialState() {
+        return {
+            val: ""
+        };
+    },
+    handleChange: function handleChange(e) {
+        this.setState({
+            val: e.target.value
+        });
+    },
+    handleClick: function handleClick() {
+        var newNote = {
+            text: this.state.val,
+            id: Date.now()
+        };
+        this.props.onAddNote(newNote);
+
+        this.setState({
+            val: ""
+        });
+    },
     render: function render() {
         return _react2.default.createElement(
-            "div",
+            'div',
             null,
+            _react2.default.createElement('textarea', { cols: '30', rows: '10', value: this.state.val, onChange: this.handleChange }),
             _react2.default.createElement(
-                "h1",
-                null,
-                this.props.name
-            ),
-            _react2.default.createElement(
-                "h2",
-                null,
-                this.props.lastname
-            ),
-            _react2.default.createElement(
-                "h3",
-                null,
-                this.props.age
+                'button',
+                { onClick: this.handleClick },
+                'Add'
             )
         );
     }
 });
 
 var App = _react2.default.createClass({
-    displayName: "App",
+    displayName: 'App',
     getInitialState: function getInitialState() {
         return {
-            persons: arr
+            notes: _data.arr
         };
     },
-    handler: function handler(e) {
-        var query = e.target.value.toLowerCase();
-
-        var filtredArr = arr.filter(function (el) {
-            if (el.name.toLowerCase().indexOf(query) != -1) {
-                return el.name;
-            }
+    componentDidMount: function componentDidMount() {
+        var localNotes = JSON.parse(localStorage.getItem('notes'));
+        if (localNotes) {
+            this.setState({
+                notes: localNotes
+            });
+        }
+    },
+    onDeleteNote: function onDeleteNote(note) {
+        var newArr = this.state.notes.filter(function (el) {
+            return el.id != note.id;
         });
 
         this.setState({
-            persons: filtredArr
+            notes: newArr
         });
+    },
+    addNote: function addNote(newNote) {
+        var newArr = this.state.notes.slice();
+        newArr.unshift(newNote);
+
+        this.setState({
+            notes: newArr
+        });
+    },
+    componentDidUpdate: function componentDidUpdate() {
+        this.updateLocalStorage();
+    },
+    updateLocalStorage: function updateLocalStorage() {
+        var notes = JSON.stringify(this.state.notes);
+        localStorage.setItem('notes', notes);
     },
     render: function render() {
         return _react2.default.createElement(
-            "div",
+            'div',
             null,
-            _react2.default.createElement("input", { type: "text", onChange: this.handler }),
-            this.state.persons.map(function (el) {
-                return _react2.default.createElement(Contact, { key: el.id, name: el.name, lastname: el.lastname, age: el.age });
-            })
+            _react2.default.createElement(NoteEditor, { onAddNote: this.addNote }),
+            _react2.default.createElement(NotesGrid, { notes: this.state.notes, deleteNote: this.onDeleteNote })
         );
     }
 });
 
-_reactDom2.default.render(_react2.default.createElement(App, null), document.getElementById("content"));
+_reactDom2.default.render(_react2.default.createElement(App, null), document.getElementById('content'));
 
 /***/ }),
 /* 82 */
@@ -22470,6 +22515,33 @@ var ReactDOMInvalidARIAHook = {
 
 module.exports = ReactDOMInvalidARIAHook;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 184 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var arr = exports.arr = [{
+    id: 1,
+    text: "some text 1"
+}, {
+    id: 2,
+    text: "some text 2"
+}, {
+    id: 3,
+    text: "some text 3"
+}, {
+    id: 4,
+    text: "some text 4"
+}, {
+    id: 5,
+    text: "some text 5"
+}];
 
 /***/ })
 /******/ ]);
