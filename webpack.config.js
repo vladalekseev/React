@@ -1,21 +1,29 @@
-var path = require('path');
-var webpack = require('webpack');
+const path = require('path');
 
 module.exports = {
-    entry: './js/app.jsx',
-    output: { path: __dirname, filename: 'bundle.js' },
-    watch: true,
+    entry : path.join(__dirname, 'src', 'app.jsx'),
+    output : {
+        path : path.join(__dirname, 'public'),
+        filename : 'bundle.js'
+    },
 
-    module: {
-        loaders: [
+    module : {
+        rules : [
             {
-                test: /.jsx?$/,
-                loader: 'babel-loader',
+                test : /\.jsx$/,
                 exclude: /node_modules/,
-                query: {
-                    presets: ['es2015', 'react']
-                }
+                use: ['react-hot-loader', 'babel-loader']
+            },
+            {
+                test: /\.sass$/,
+                use: ['style-loader', 'css-loader', 'sass-loader']
             }
         ]
     },
+
+    devtool: 'eval-source-map',
+
+    resolve: {
+        extensions: ['.js', '.jsx', '.json', '*']
+    }
 };
